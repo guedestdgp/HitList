@@ -28,13 +28,15 @@ class ViewController: UIViewController {
     @IBAction func addName(_ sender: UIBarButtonItem) {
         
         //Alert
-        let alert = UIAlertController(title: "New Name", message: "Add a new name", preferredStyle: .alert)
+        let alert = UIAlertController(title: "New Person", message: "Add a new name, age, city, yes or no gratuate", preferredStyle: .alert)
         
         //Button Save
         let saveAction = UIAlertAction(title: "Save", style: .default) {
             [unowned self] action in
             guard let textField = alert.textFields?.first, let nameToSave = textField.text else { return }
-            self.save(name: nameToSave)
+            
+            let data = nameToSave.components(separatedBy: ",")
+            self.save(data: data)
             self.tableView.reloadData()
         }
         
@@ -47,7 +49,8 @@ class ViewController: UIViewController {
         present(alert, animated: true)
     }
     
-    func save(name: String) {
+    func save(data: [String]) {
+        
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
         // 1
         let managedContext = appDelegate.persistentContainer.viewContext
@@ -55,7 +58,10 @@ class ViewController: UIViewController {
         let entity = NSEntityDescription.entity(forEntityName: "Person", in: managedContext)!
         
         let person = NSManagedObject(entity: entity, insertInto: managedContext)
-        person.setValue(name, forKeyPath: "name")
+        person.setValue(data[0], forKeyPath: "name")
+        person.setValue(Int(data[1]), forKeyPath: "age")
+        person.setValue(data[2], forKeyPath: "city")
+        person.setValue(data[3] == "yes" ? true : false, forKeyPath: "graduate")
         // 4
         do {
         try managedContext.save()
@@ -92,7 +98,10 @@ extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let person = people[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        cell.textLabel?.text = person.value(forKeyPath: "name") as? String
+        cell.textLabel?.text = "Name: \(String(describing: person.value(forKeyPath: "name")!))" +
+        " - Age: \(person.value(forKeyPath: "age")!)" +
+        " - City: \(person.value(forKeyPath: "city")!)" +
+        " - Graduate: \(person.value(forKeyPath: "graduate")!)"
         return cell
     }
     
