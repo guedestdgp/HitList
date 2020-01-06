@@ -36,8 +36,10 @@ class ViewController: UIViewController {
             guard let textField = alert.textFields?.first, let nameToSave = textField.text else { return }
             
             let data = nameToSave.components(separatedBy: ",")
-            self.save(data: data)
-            self.tableView.reloadData()
+            if data.count == 4 {
+                self.save(data: data)
+                self.tableView.reloadData()
+            }
         }
         
         //Button Cancel
@@ -98,10 +100,11 @@ extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let person = people[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        let graduate = (person.value(forKeyPath: "graduate") as? Bool)! ? "yes" : "no"
         cell.textLabel?.text = "Name: \(String(describing: person.value(forKeyPath: "name")!))" +
-        " - Age: \(person.value(forKeyPath: "age")!)" +
-        " - City: \(person.value(forKeyPath: "city")!)" +
-        " - Graduate: \(person.value(forKeyPath: "graduate")!)"
+        " - \(person.value(forKeyPath: "age")!)" +
+        " - \(person.value(forKeyPath: "city")!)" +
+        " - Graduate: \(graduate)"
         return cell
     }
     
